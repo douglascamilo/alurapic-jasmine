@@ -6,7 +6,7 @@ import { SignUpService } from './signup.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 describe('Componente: SignUpComponent', () => {
   let componente: SignUpComponent;
@@ -45,13 +45,27 @@ describe('Componente: SignUpComponent', () => {
     spyOn(router, 'navigate');
     spyOn(signUpService, 'signup').and.returnValue(of({}));
 
-    const formulario = componente.signupForm;
-    formulario.get('email').setValue('douglas@douglas.com');
-    formulario.get('fullName').setValue('Douglas Sousa');
-    formulario.get('userName').setValue('douglas');
-    formulario.get('password').setValue('123');
+    preencheFormulario();
     componente.signUp();
 
     expect(router.navigate).toHaveBeenCalledWith(['']);
   });
+
+  it('deve realizar o log caso ocorra algum erro', () => {
+    const mensagemDeErro = '500 - Erro no Servidor';
+    spyOn(console, 'log');
+    spyOn(signUpService, 'signup').and.returnValue(throwError(mensagemDeErro));
+
+    preencheFormulario();
+    componente.signUp();
+
+    expect(console.log).toHaveBeenCalledWith(mensagemDeErro);
+  });
+
+  function preencheFormulario() {
+    componente.signupForm.get('email').setValue('douglas@douglas.com');
+    componente.signupForm.get('fullName').setValue('Douglas Sousa');
+    componente.signupForm.get('userName').setValue('douglas');
+    componente.signupForm.get('password').setValue('123');
+  }
 });
